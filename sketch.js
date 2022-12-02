@@ -4,10 +4,12 @@ let spaceship; // the spaceship object that players could control
 // interactivity
 let asteroids; // asteroids in the world
 let bullets; // the group of bullets
+let currentHealth = 5; // current health of the spaceship
 
 // some constants
 let MARGIN = 40;
 let MAXSPEED = 8;
+let MAXLIFE = 10;
 
 
 function setup() {
@@ -15,20 +17,23 @@ function setup() {
   // set up the spaceship
   spaceship = new Sprite(); // create the main character
   spaceship.rotation = -90; // adjust the rotation direction
-
+  
   // set up the bullets 
   bullets = new Group(); // create a group of bullet
 }
 
 function draw() {
-
-  spaceShipControl();    // take charge of the control block of the spaceship
+  
   spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary
+  spaceShipControl();    // take charge of the control block of the spaceship
+  spaceshipHealth();     // draw the current health of the spaceship according to 
   // bullet shooting logic         
-  if (kb.presses('J')) {
+  if (!spaceship.removed && kb.presses('J')) {
     // create sprites
-    new bullets.Sprite(spaceship.position.x, spaceship.position.y, 5);
-    bullets.setSpeed(16, spaceship.rotation);
+    let bullet = createSprite(spaceship.position.x, spaceship.position.y);
+    bullet.setSpeed(10 + spaceship.speed, spaceship.rotation);
+    bullet.life = 30;
+    bullets.add(bullet);
   }
 
 
