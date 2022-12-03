@@ -4,6 +4,10 @@ let asteroids; // asteroids in the world
 let bullets; // the group of bullets
 let healthbars; // the group of health bar objects
 let rank;
+let r;
+let px;
+let py;
+let counter = 0;
 
 // images
 let rankImage;
@@ -11,6 +15,7 @@ let rankImage;
 // numbered constants
 let currentHealth = 5; // current health of the spaceship
 let ranks = 1;
+let num_asteroids;
 
 
 
@@ -26,7 +31,7 @@ let RANK3 = "rank3";
 /**
  * Loading assets preemptively to avoid further discomfort
  */
-preload = function(){
+preload = function () {
   rankImage = new Array();
   rankImage.length = 3;
   rankImage[0] = loadImage("./assets/ranks/rank1.png");
@@ -39,21 +44,61 @@ function setup() {
   // set up the spaceship
   spaceship = new Sprite(); // create the main character
   spaceship.rotation = -90; // adjust the rotation direction
-  
+  spaceship.color = "pink";
+
+  asteroids = new Group(); // create new asteroids
+  asteroids.color = 'brown';
+
   // set up the bullets 
   bullets = new Group(); // create a group of bullet
 
   // set up the rank
   rank = new Sprite();
   rank.removeColliders();
-  rank.addImage(RANK1,rankImage[0]);
+  rank.addImage(RANK1, rankImage[0]);
   rank.layer = 1;
   rank.position.y = windowHeight - MARGIN - 64;
   rank.position.x = windowWidth / 2;
+
+  // px = width;
+  // py = height;
+
+  for (var i = 0; i < 10; i++) {
+    var angle = random(360);
+    px = width + 1000* cos(radians(angle));
+    py = sin(radians(angle));
+    // createAsteroid(3, x, y);
+    createNewAsteroid(ceil(random(4), px, py))
+  }
+}
+
+function createNewAsteroid(type, x, y) {
+  var a = createSprite(px, py, type * 20)
+  a.speed = 6 - (type);
+  a.direction = random(180);
+  a.rotationSpeed = 0.5;
+  a.type = type;
+  a.color = "brown";
+
+  if (a.type == 4) {
+    a.scale = 1.75;
+  }
+  if (a.type == 3) {
+    a.scale = 1.65;
+  }
+  if (a.type == 2) {
+    a.scale = 1.55;
+  }
+  if (a.type == 1) {
+    a.scale = 1.5;
+  }
+  a.mass = 2 + a.scale;
+  asteroids.add(a);
+  return a;
 }
 
 function draw() {
-  
+
   spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary
   spaceShipControl();    // take charge of the control block of the spaceship
   spaceshipHealth();     // draw the current health of the spaceship according to some condition
@@ -68,11 +113,34 @@ function draw() {
     bullets.add(bullet);
   }
 
+  for (var i = 0; i < asteroids.length; i++) {
+    var sprite = asteroids[i];
+    if (sprite.position.x < -MARGIN) {
+      sprite.position.x = width + MARGIN;
+    }
+    if (sprite.position.x > width + MARGIN) {
+      sprite.position.x = -MARGIN;
+    }
+    if (sprite.position.y < -MARGIN) {
+      sprite.position.y = height + MARGIN;
+    }
+    if (sprite.position.y > height + MARGIN) {
+      sprite.position.y = -MARGIN;
+    }
+  }
 
+  asteroids.overlap(spaceship, asteroidHit);
+  asteroids.overlap(bullets, asteroidHit);
 
   // player.overlap(coins, collect);
   // drawSprites();
   background(0);        //background to be set dark
+  // clear();
+}
+
+function asteroidHit(asteroid, sprite) {
+  sprite.remove();
+  asteroid.remove();
 }
 
 
@@ -123,10 +191,10 @@ function spaceshipResetPosit() {
 /**
  * Function takes in charge of drawing of the health bar
  */
-function spaceshipHealth(){
-  
+function spaceshipHealth() {
+
 }
 
-function drawranks(){
+function drawranks() {
 
 }
