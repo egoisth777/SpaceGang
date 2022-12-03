@@ -1,16 +1,38 @@
 // player object
 let spaceship; // the spaceship object that players could control
-
-// interactivity
 let asteroids; // asteroids in the world
 let bullets; // the group of bullets
+let healthbars; // the group of health bar objects
+let rank;
+
+// images
+let rankImage;
+
+// numbered constants
 let currentHealth = 5; // current health of the spaceship
+let ranks = 1;
+
+
 
 // some constants
 let MARGIN = 40;
 let MAXSPEED = 8;
 let MAXLIFE = 10;
+let RANK1 = "rank1";
+let RANK2 = "rank2";
+let RANK3 = "rank3";
 
+
+/**
+ * Loading assets preemptively to avoid further discomfort
+ */
+preload = function(){
+  rankImage = new Array();
+  rankImage.length = 3;
+  rankImage[0] = loadImage("./assets/ranks/rank1.png");
+  rankImage[1] = loadImage("./assets/ranks/rank2.png");
+  rankImage[2] = loadImage("./assets/ranks/rank3.png");
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -20,17 +42,27 @@ function setup() {
   
   // set up the bullets 
   bullets = new Group(); // create a group of bullet
+
+  // set up the rank
+  rank = new Sprite();
+  rank.removeColliders();
+  rank.addImage(RANK1,rankImage[0]);
+  rank.layer = 1;
+  rank.position.y = windowHeight - MARGIN - 64;
+  rank.position.x = windowWidth / 2;
 }
 
 function draw() {
   
   spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary
   spaceShipControl();    // take charge of the control block of the spaceship
-  spaceshipHealth();     // draw the current health of the spaceship according to 
+  spaceshipHealth();     // draw the current health of the spaceship according to some condition
+  drawranks();
   // bullet shooting logic         
   if (!spaceship.removed && kb.presses('J')) {
     // create sprites
     let bullet = createSprite(spaceship.position.x, spaceship.position.y);
+    bullet.removeColliders();
     bullet.setSpeed(10 + spaceship.speed, spaceship.rotation);
     bullet.life = 30;
     bullets.add(bullet);
@@ -85,4 +117,16 @@ function spaceshipResetPosit() {
       s.position.y = -MARGIN;
     }
   }
+}
+
+
+/**
+ * Function takes in charge of drawing of the health bar
+ */
+function spaceshipHealth(){
+  
+}
+
+function drawranks(){
+
 }
