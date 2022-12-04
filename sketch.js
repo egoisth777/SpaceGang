@@ -9,6 +9,7 @@ let galaxies;
 let earth;
 let fueltanks; // group of the upgrade model
 let upgradeModel; // upgrade model across the map
+let upgradeIcons; // upgrade Icons
 
 
 // images
@@ -21,6 +22,7 @@ let bullet_img;
 // tracking information
 let currentHealth = 5;
 let ranks = 1;
+let score = 0;
 
 
 // animations
@@ -31,6 +33,7 @@ let spaceshipAnimation_4; // fuel animation
 let destroyAnimation;     // destroy animation
 let galaxyAnimation_1;
 let shieldAnimation;
+let upgradeIconAnimation; // upgrade icon animation
 
 // some constants
 const MARGIN = 40;
@@ -38,6 +41,7 @@ const MAXSPEED = 5;
 const MAXLIFE = 10;
 const CANVASWIDTH = 1200;
 const CANVASHEIGHT = 1200;
+const MAXUPGRADE = 12;
 
 const RANK1 = "rank1";
 const RANK2 = "rank2";
@@ -111,6 +115,9 @@ preload = function () {
   // load spaceship destroy animation
   destroyAnimation = loadAnimation("./assets/asteroids/explosion_particles.png", { size: [64, 64], frames: 25 });
   destroyAnimation.frameDelay = 3;
+
+  // load upgrade icon animation
+  upgradeIconAnimation = loadAnimation("./assets/asteroids/upgrade_icon.png", { size: [64, 64], frames: 15});
 }
 
 
@@ -118,7 +125,6 @@ function setup() {
   createCanvas(CANVASWIDTH, CANVASWIDTH);
   //set some constants
   currentHealth = 5;
-  ranks = 1;
 
   // set up the props and decorations across the map
   fueltanks = new Group();
@@ -131,6 +137,7 @@ function setup() {
   o.scale = 0.5;
   o.layer = 4;
   fueltanks.add(o);
+
 
   // set up earth and galaxies
   galaxies = new Group();
@@ -157,12 +164,28 @@ function setup() {
   // set up the rank
   rank = new Sprite();
   rank.removeColliders();
+  rank.addAni(RANK3, rankImage_arr[2]);
+  rank.addAni(RANK2, rankImage_arr[1]);
   rank.addAni(RANK1, rankImage_arr[0]);
   rank.layer = 1;
   rank.position.y = CANVASHEIGHT - 100;
   rank.position.x = CANVASWIDTH / 2;
   rank.scale = 1.5;
-
+  rank.update = function(){
+    let size = upgradeIcons.size();
+    if(size > 0 && rank < 6){
+      rank.changeAnimation(RANK1);
+      return;
+    }
+    if(size >= 6 && size < 12){
+      rank.changeAnimation(RANK2);
+      return;
+    }
+    if(size >= 12){
+      rank.changeAnimation(RANK3);
+      return
+    }
+  }
   //set up the healthbar
   healthbar = new Sprite();
   healthbar.removeColliders();
@@ -185,6 +208,9 @@ function setup() {
     py = random(height / 2 + 1000 * sin(radians(angle)));
     createNewAsteroid(ceil(random(4), px, py));
   }
+
+  // set up the upgrade icons
+  upgradeIcons = new Group();
 }
 
 function createEarth() {
@@ -266,8 +292,7 @@ function createNewAsteroid(type, x, y) {
 function draw() {
 
   clear();
-  spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary
-  // bullet shooting logic         
+  spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary      
 
   spaceShipControl();    // take charge of the control block of the spaceship
   updateShipProperty();     // draw the cuzrrent health of the spaceship according to some condition
@@ -295,9 +320,20 @@ function asteroidHit(asteroid, sprite) {
   if (sprite.removed) {
     return;
   }
+
+  // get score from hitting the asteroids
+  let o = new Sprite();
+  o.removeColliders();
+  o.addAni("upgradeIconAnimation", upgradeIconAnimation);
+  let size = upgradeIcons.size();
+  o.position.x = rank.position.x + 80  + 30 * (size % 6);
+  o.position.y = rank.position.y + 30 * floor((size / 6));
+  upgradeIcons.add(o);
+
   sprite.remove();
   asteroid.remove();
 }
+
 // place holder function
 // comment out this code if you don't want to see the screen
 // function gameOver(){
@@ -334,7 +370,7 @@ function spaceShipControl() {
     bullet.debug = true;
     bullet.setSpeed(20 + spaceship.speed, spaceship.direction);
     // bullet.removeColliders();
-    bullet.life = 45;
+    bullet.life = 20;
     bullet.kinematic = true;
     bullets.add(bullet);
   }else{
