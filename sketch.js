@@ -263,7 +263,6 @@ function asteroidHit(asteroid, spaceship) {
   if(currentHealth < 0){
     spaceship.changeAnimation(SPAC_ANI_2);
     destructor();
-    // setup();
   }
 }
 
@@ -272,10 +271,10 @@ function asteroidHit(asteroid, spaceship) {
  * initialized value when restarted
  */
 function destructor(){
-  asteroids.removeAll();
   spaceship.remove();
+  asteroids.removeAll();
   galaxies.removeAll();
-
+  setup();
 }
 
 function spaceShipControl() {
