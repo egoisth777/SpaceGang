@@ -29,7 +29,7 @@ let fueltankAnimation;
 
 // some constants
 let MARGIN = 40;
-let MAXSPEED = 20;
+let MAXSPEED = 5;
 let MAXLIFE = 10;
 let CANVASWIDTH = 1200;
 let CANVASHEIGHT = 1200;
@@ -108,13 +108,13 @@ function setup() {
   // o.removeColliders();
   o.position.x = 400;
   o.position.y = 400;
-  o.scale = 2;
+  o.scale = 0.5;
   o.layer = 4;
   fueltanks.add(o);
 
   // set up the spaceship
   spaceship = new Sprite(); // create the main character
-  // spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
+  spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
   spaceship.direction = -90;
   spaceship.layer = 4;
   spaceship.overlaps(fueltanks, collectFuelTank);
@@ -149,9 +149,9 @@ function setup() {
 
 function createEarth() {
   earth.addAni("earthAni", earth_img);
-  earth.scale = 10;
-  earth.position.x = windowWidth - 400;
-  earth.position.y = 400;
+  earth.scale = 1;
+  earth.position.x = CANVASWIDTH - 200;
+  earth.position.y = 200;
 }
 
 function createGalaxies() {
@@ -182,7 +182,7 @@ function draw() {
     // create sprites
     let bullet = createSprite(spaceship.position.x, spaceship.position.y);
     bullet.layer = 3;
-    bullet.scale = 0.5;
+    bullet.scale = 0.2;
     bullet.color = '66CCFF';
     bullet.removeColliders();
     bullet.setSpeed(20 + spaceship.speed, spaceship.direction);
@@ -274,13 +274,13 @@ function updateShipProperty() {
 }
 
 function updateStatusBar() {
-  rank.position.y = CANVASHEIGHT- 150;
+  rank.position.y = CANVASHEIGHT- 100;
   rank.position.x = CANVASWIDTH / 2;
-  rank.scale = 2;
+  rank.scale = 1.5;
   
   healthbar.position.y = rank.position.y;
-  healthbar.position.x = rank.position.x - 150;
-  healthbar.scale = 2;
+  healthbar.position.x = rank.position.x - 100;
+  healthbar.scale = 1.5;
 }
 
 
