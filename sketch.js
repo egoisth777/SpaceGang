@@ -15,6 +15,7 @@ let rankImage;
 let healthbar_imgs;
 let background_imgs;
 let earth_img;
+let bullet_img;
 
 // tracking information
 let currentHealth = 5; // current health of the spaceship
@@ -22,7 +23,8 @@ let ranks = 1;
 
 
 // animations
-let spaceshipAnimation_1;
+let spaceshipAnimation_1; // normal animation
+let destroyAnimation;   // destroy animation
 let galaxyAnimation_1;
 let fueltankAnimation;
 
@@ -41,6 +43,8 @@ let HEALTH = ["health1", "health2", "health3", "health4", "health5", "health6", 
 
 
 let SPAC_ANI_1 = "spaceshipAnimation1";
+let SPAC_ANI_2 = "spaceshipAnimation2";
+
 
 
 /**
@@ -97,14 +101,26 @@ preload = function () {
   fueltankAnimation = loadAnimation("./assets/props/fueltank.png", { size: [64, 64], frames: 7 });
   fueltankAnimation.frameDelay = 2;
 
+  // load the bullet image
+  bullet_img = loadImage("./assets/asteroids/asteroids_bullet.png");
+
+ // load spaceship destroy animation
+  destroyAnimation = loadAnimation("./assets/asteroids/explosion_particles.png", {size: [70,70,], frames: 25});
+  destroyAnimation.frameDelay = 3;
 }
+
+
 function setup() {
   createCanvas(CANVASWIDTH, CANVASWIDTH);
+  //set some constants
+  currentHealth = 5;
+  ranks = 1;
 
   // set up the props
   fueltanks = new Group();
   let o = new Sprite();
   o.addAni("", fueltankAnimation);
+  o.bounciness = 0.1;
   // o.removeColliders();
   o.position.x = 400;
   o.position.y = 400;
@@ -114,16 +130,17 @@ function setup() {
 
   // set up the spaceship
   spaceship = new Sprite(); // create the main character
+  spaceship.addAni(SPAC_ANI_2, destroyAnimation);
   spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
   spaceship.direction = -90;
   spaceship.layer = 4;
   spaceship.overlaps(fueltanks, collectFuelTank);
+  spaceship.kinematic = true;
 
   // set up the bullets 
-  spaceship.scale = 1;
   bullets = new Group(); // create a group of bullet
-
-
+  bullets.removeAll();
+  
   // set up the rank
   rank = new Sprite();
   rank.removeColliders();
@@ -137,6 +154,7 @@ function setup() {
   for(let i = 0; i < healthbar_imgs.length; i++){
     healthbar.addAni(HEALTH[i], healthbar_imgs[i]);
   }
+  healthbar.changeAnimation(HEALTH[currentHealth - 1]);
 
   // set up earth and galaxies
   galaxies = new Group();
@@ -145,6 +163,23 @@ function setup() {
   createEarth();
   createGalaxies();
 
+
+  //set up the asteroids
+  asteroids = new Group();
+  asteroids.removeAll();
+  for (var i = 0; i < 10; i++) {
+    var angle = random(360);
+    px = CANVASWIDTH + 100* cos(radians(angle));
+    py = sin(radians(angle));
+    createNewAsteroid(ceil(random(4), px, py));
+  }
+  
+  asteroids.overlaps(bullets, asteroidHit);
+  asteroids.overlaps(spaceship, asteroidHit);
+
+  let particles = new Sprite();
+  particles.scale = 2;
+  particles.addAni("destroy", destroyAnimation);
 }
 
 function createEarth() {
@@ -171,45 +206,100 @@ function createGalaxies() {
   }
 }
 
+/**
+ * Create asteroids
+ * @param {*} type 
+ * @param {*} x 
+ * @param {*} y 
+ * @returns 
+ */
+function createNewAsteroid(type, x, y) {
+  var a = createSprite(px, py, type * 20)
+  a.speed = 6 - (type);
+  a.direction = random(180);
+  a.rotationSpeed = 0.5;
+  a.type = type;
+  a.color = "brown";
+
+  if (a.type == 4) {
+    a.scale = 1.75;
+  }
+  if (a.type == 3) {
+    a.scale = 1.65;
+  }
+  if (a.type == 2) {
+    a.scale = 1.55;
+  }
+  if (a.type == 1) {
+    a.scale = 1.5;
+  }
+  a.mass = 2 + a.scale;
+  asteroids.add(a);
+  return a;
+}
+
 
 function draw() {
 
-
+  clear();
   spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary
   // bullet shooting logic         
-  if (!spaceship.removed && kb.presses('J')) {
 
-    // create sprites
-    let bullet = createSprite(spaceship.position.x, spaceship.position.y);
-    bullet.layer = 3;
-    bullet.scale = 0.2;
-    bullet.color = '66CCFF';
-    bullet.removeColliders();
-    bullet.setSpeed(20 + spaceship.speed, spaceship.direction);
-    bullet.life = 60;
-    bullets.add(bullet);
-  }
   spaceShipControl();    // take charge of the control block of the spaceship
   updateShipProperty();     // draw the current health of the spaceship according to some condition
 
-
-
+  // Set the asteroids control logic
 
   // set up the background images
-
+  
   // background(0);       
   background(background_imgs[0]);
   // background(0);
 }
 
+function asteroidHit(asteroid, spaceship) {
+  asteroid.remove();
+  currentHealth--;
+  if(currentHealth < 0){
+    spaceship.changeAnimation(SPAC_ANI_2);
+    destructor();
+    // setup();
+  }
+}
 
+/**
+ * This function is called to ensure that everything is set to 
+ * initialized value when restarted
+ */
+function destructor(){
+  asteroids.removeAll();
+  spaceship.remove();
+  galaxies.removeAll();
+
+}
 
 function spaceShipControl() {
 
+  if (!spaceship.removed && kb.presses('J')) {
+    // create sprites
+    let bullet = new Sprite(); 
+    bullet.position.x = spaceship.position.x;
+    bullet.position.y = spaceship.position.y;
+    bullet.width = 10;
+    bullet.height = 10;
+    bullet.layer = 3;
+    bullet.color = '#66CCFF';
+    bullet.debug = true;
+    bullet.setSpeed(20 + spaceship.speed, spaceship.direction);
+    // bullet.removeColliders();
+    bullet.life = 45;
+    bullet.kinematic = true;
+    bullets.add(bullet);
+  }
   // spaceship.direction -= 90; // adjust the rotation direction
-  console.log(spaceship.direction);
-  console.log(spaceship.rotation);
-  console.log(spaceship.speed);
+  // console.log(spaceship.direction);
+  // console.log(spaceship.rotation);
+  // console.log(spaceship.speed);
   // control the player movement
   if (kb.presses('left') || kb.presses('A') || kb.pressing('left') || kb.pressing('A')) {
     // (direction, speed, distance)
@@ -245,21 +335,17 @@ function spaceShipControl() {
 function spaceshipResetPosit() {
 
   for (var i = 0; i < allSprites.length; i++) {
-    let s = spaceship;
+    let s = allSprites[i];
     if (s.position.x < -MARGIN) {
       s.position.x = width + MARGIN;
-      createGalaxies();
     } else if (s.position.x > width + MARGIN) {
       s.position.x = -MARGIN;
-      createGalaxies();
     }
 
     if (s.position.y < -MARGIN) {
       s.position.y = height + MARGIN;
-      createGalaxies();
     } else if (s.position.y > height + MARGIN) {
       s.position.y = -MARGIN;
-      createGalaxies();
     }
   }
 }
@@ -285,7 +371,7 @@ function updateStatusBar() {
 
 
 function collectFuelTank(spaceship, fueltank) {
-  console.log("I am called");
+  // console.log("I am called");
   fueltank.remove();
   currentHealth++;
 }
