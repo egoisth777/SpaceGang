@@ -31,6 +31,9 @@ let fueltankAnimation;
 let MARGIN = 40;
 let MAXSPEED = 20;
 let MAXLIFE = 10;
+let CANVASWIDTH = 1200;
+let CANVASHEIGHT = 1200;
+
 let RANK1 = "rank1";
 let RANK2 = "rank2";
 let RANK3 = "rank3";
@@ -96,7 +99,7 @@ preload = function () {
 
 }
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(CANVASWIDTH, CANVASWIDTH);
 
   // set up the props
   fueltanks = new Group();
@@ -117,7 +120,7 @@ function setup() {
   spaceship.overlaps(fueltanks, collectFuelTank);
 
   // set up the bullets 
-  spaceship.scale = 4;
+  spaceship.scale = 1;
   bullets = new Group(); // create a group of bullet
 
 
@@ -271,13 +274,13 @@ function updateShipProperty() {
 }
 
 function updateStatusBar() {
-  rank.position.y = windowHeight - 200;
-  rank.position.x = windowWidth / 2;
-  rank.scale = 4;
+  rank.position.y = CANVASHEIGHT- 150;
+  rank.position.x = CANVASWIDTH / 2;
+  rank.scale = 2;
   
   healthbar.position.y = rank.position.y;
-  healthbar.position.x = rank.position.x - 300;
-  healthbar.scale = 4;
+  healthbar.position.x = rank.position.x - 150;
+  healthbar.scale = 2;
 }
 
 
