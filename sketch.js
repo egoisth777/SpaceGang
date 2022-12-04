@@ -164,10 +164,12 @@ function setup() {
       return;
     }
     if(size >= 6 && size < 12){
+      spaceship.addAni(SPAC_ANI_4);
       maxspeed = 10;
       return;
     }
     if(size >= 12){
+      spaceship.addAni(SPAC_ANI_2);
       maxspeed = 15;
       return
     }
