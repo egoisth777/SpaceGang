@@ -169,13 +169,10 @@ function setup() {
   asteroids.removeAll();
   for (var i = 0; i < 10; i++) {
     var angle = random(360);
-    px = CANVASWIDTH + 100* cos(radians(angle));
-    py = sin(radians(angle));
+    px = width / 2 + 1000 * cos(radians(angle));
+    py = random(height / 2 + 1000 * sin(radians(angle)));
     createNewAsteroid(ceil(random(4), px, py));
   }
-  
-  asteroids.overlaps(bullets, asteroidHit);
-  asteroids.overlaps(spaceship, asteroidHit);
 
   let particles = new Sprite();
   particles.scale = 2;
@@ -196,12 +193,13 @@ function createGalaxies() {
     let s = new Sprite();
     s.layer = 0;
     s.removeColliders();
-    s.scale = random(1, 20);
+    s.scale = floor(random(2, 4));
     s.addAni("galaxyAni", galaxyAnimation_1);
-    s.position.x = random(400, windowWidth - 400);
-    s.position.y = random(400, windowHeight - 400);
-    s.vel.x = random(-0.2, 0.2);
-    s.vel.y = random(-0.2, 0.2);
+    s.position.x = floor(random(1000));
+    s.position.y = floor(random(1000));
+    s.vel.x = random(1.2);
+    s.vel.y = random(1.2);
+    s.direction = random(360);
     galaxies.add(s);
   }
 }
@@ -246,8 +244,9 @@ function draw() {
   // bullet shooting logic         
 
   spaceShipControl();    // take charge of the control block of the spaceship
-  updateShipProperty();     // draw the current health of the spaceship according to some condition
-
+  updateShipProperty();     // draw the cuzrrent health of the spaceship according to some condition
+  asteroids.collide(bullets, asteroidHit);
+  asteroids.overlaps(spaceship, spaceshipHit);
   // Set the asteroids control logic
 
   // set up the background images
@@ -257,14 +256,29 @@ function draw() {
   // background(0);
 }
 
-function asteroidHit(asteroid, spaceship) {
-  asteroid.remove();
+function spaceshipHit(spaceship, sprite) {
   currentHealth--;
-  if(currentHealth < 0){
+  if(currentHealth == 0){
     spaceship.changeAnimation(SPAC_ANI_2);
     destructor();
   }
 }
+
+function asteroidHit(asteroid, sprite){
+  if (sprite.removed) {
+    return;
+  }
+sprite.remove();
+asteroid.remove();
+}
+// place holder function
+// comment out this code if you don't want to see the screen
+// function gameOver(){
+//   background('red');
+//   textSize(40);
+//   text("Game Over", 300, 300);
+//   exit();
+// }
 
 /**
  * This function is called to ensure that everything is set to 
