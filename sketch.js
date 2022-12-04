@@ -7,6 +7,8 @@ let healthbar;
 let bg;
 let galaxies;
 let earth;
+let fueltanks; // group of the upgrade model
+
 
 // images
 let rankImage;
@@ -22,6 +24,7 @@ let ranks = 1;
 // animations
 let spaceshipAnimation_1;
 let galaxyAnimation_1;
+let fueltankAnimation;
 
 
 // some constants
@@ -31,16 +34,8 @@ let MAXLIFE = 10;
 let RANK1 = "rank1";
 let RANK2 = "rank2";
 let RANK3 = "rank3";
-let HEALTH_1 = "health1";
-let HEALTH_2 = "health2";
-let HEALTH_3 = "health3";
-let HEALTH_4 = "health4";
-let HEALTH_5 = "health5";
-let HEALTH_6 = "health6";
-let HEALTH_7 = "health7";
-let HEALTH_8 = "health8";
-let HEALTH_9 = "health9";
-let HEALTH_10 = "health10";
+let HEALTH = ["health1", "health2", "health3", "health4", "health5", "health6", "health7", "health8", "health9", "health10"];
+
 
 let SPAC_ANI_1 = "spaceshipAnimation1";
 
@@ -59,16 +54,16 @@ preload = function () {
 
   // load healthbar images
   healthbar_imgs = new Array();
-  healthbar_imgs[0] = loadImage("./assets/healthbar/healthbar_00.png");
-  healthbar_imgs[1] = loadImage("./assets/healthbar/healthbar_01.png");
-  healthbar_imgs[2] = loadImage("./assets/healthbar/healthbar_02.png");
-  healthbar_imgs[3] = loadImage("./assets/healthbar/healthbar_03.png");
-  healthbar_imgs[4] = loadImage("./assets/healthbar/healthbar_04.png");
-  healthbar_imgs[5] = loadImage("./assets/healthbar/healthbar_05.png");
-  healthbar_imgs[6] = loadImage("./assets/healthbar/healthbar_06.png");
-  healthbar_imgs[7] = loadImage("./assets/healthbar/healthbar_07.png");
-  healthbar_imgs[8] = loadImage("./assets/healthbar/healthbar_08.png");
-  healthbar_imgs[9] = loadImage("./assets/healthbar/healthbar_09.png");
+  healthbar_imgs[0] = loadAni("./assets/healthbar/healthbar_00.png", { size: [64, 64], frames: 1 });
+  healthbar_imgs[1] = loadAni("./assets/healthbar/healthbar_01.png", { size: [64, 64], frames: 1 });
+  healthbar_imgs[2] = loadAni("./assets/healthbar/healthbar_02.png", { size: [64, 64], frames: 1 });
+  healthbar_imgs[3] = loadAni("./assets/healthbar/healthbar_03.png",{ size: [64, 64], frames: 1 });
+  healthbar_imgs[4] = loadAni("./assets/healthbar/healthbar_04.png",{ size: [64, 64], frames: 1 });
+  healthbar_imgs[5] = loadAni("./assets/healthbar/healthbar_05.png", { size: [64, 64], frames: 1 });
+  healthbar_imgs[6] = loadAni("./assets/healthbar/healthbar_06.png", { size: [64, 64], frames: 1 });
+  healthbar_imgs[7] = loadAni("./assets/healthbar/healthbar_07.png", { size: [64, 64], frames: 1 });
+  healthbar_imgs[8] = loadAni("./assets/healthbar/healthbar_08.png", { size: [64, 64], frames: 1 });
+  healthbar_imgs[9] = loadAni("./assets/healthbar/healthbar_09.png", { size: [64, 64], frames: 1 });
 
 
 
@@ -86,23 +81,40 @@ preload = function () {
   // load rank images
   rankImage = new Array();
   rankImage.length = 3;
-  rankImage[0] = loadAnimation("./assets/ranks/rank1.png", {size:[64,64], frames: 2});
-  rankImage[1] = loadAnimation("./assets/ranks/rank2.png", {size:[64,64], frames: 2});
-  rankImage[2] = loadAnimation("./assets/ranks/rank3.png",{size:[64,64], frames: 2});
+  rankImage[0] = loadAnimation("./assets/ranks/rank1.png", { size: [64, 64], frames: 2 });
+  rankImage[1] = loadAnimation("./assets/ranks/rank2.png", { size: [64, 64], frames: 2 });
+  rankImage[2] = loadAnimation("./assets/ranks/rank3.png", { size: [64, 64], frames: 2 });
   rankImage.forEach(s => s.frameDelay = 20);
 
   // load earth animation
-  earth_img = loadAnimation("./assets/decorations/earth_planet.png",{size:[70,70], frames:50});
+  earth_img = loadAnimation("./assets/decorations/earth_planet.png", { size: [70, 70], frames: 50 });
   earth_img.frameDelay = 50;
-}
 
+  // load the upgrade model animations
+  fueltankAnimation = loadAnimation("./assets/props/fueltank.png", { size: [64, 64], frames: 7 });
+  fueltankAnimation.frameDelay = 2;
+
+}
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  // set up the props
+  fueltanks = new Group();
+  let o = new Sprite();
+  o.addAni("", fueltankAnimation);
+  // o.removeColliders();
+  o.position.x = 400;
+  o.position.y = 400;
+  o.scale = 2;
+  o.layer = 4;
+  fueltanks.add(o);
+
   // set up the spaceship
   spaceship = new Sprite(); // create the main character
-  spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
+  // spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
   spaceship.direction = -90;
   spaceship.layer = 4;
+  spaceship.overlaps(fueltanks, collectFuelTank);
 
   // set up the bullets 
   spaceship.scale = 4;
@@ -119,18 +131,20 @@ function setup() {
   healthbar = new Sprite();
   healthbar.removeColliders();
   healthbar.layer = 1;
-  healthbar.addImage(HEALTH_1, healthbar_imgs[currentHealth - 1]);
-  
+  for(let i = 0; i < healthbar_imgs.length; i++){
+    healthbar.addAni(HEALTH[i], healthbar_imgs[i]);
+  }
+
   // set up earth and galaxies
   galaxies = new Group();
   earth = new Sprite();
+  earth.removeColliders();
   createEarth();
   createGalaxies();
 
-
 }
 
-function createEarth(){
+function createEarth() {
   earth.addAni("earthAni", earth_img);
   earth.scale = 25;
   earth.position.x = windowWidth - 400;
@@ -150,7 +164,6 @@ function createGalaxies() {
     s.position.y = random(400, windowHeight - 400);
     s.vel.x = random(-0.2, 0.2);
     s.vel.y = random(-0.2, 0.2);
-
     galaxies.add(s);
   }
 }
@@ -158,7 +171,7 @@ function createGalaxies() {
 
 function draw() {
 
-  updateStatusBar();
+
   spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary
   // bullet shooting logic         
   if (!spaceship.removed && kb.presses('J')) {
@@ -174,7 +187,7 @@ function draw() {
     bullets.add(bullet);
   }
   spaceShipControl();    // take charge of the control block of the spaceship
-  spaceshipHealth();     // draw the current health of the spaceship according to some condition
+  updateShipProperty();     // draw the current health of the spaceship according to some condition
 
 
 
@@ -250,17 +263,26 @@ function spaceshipResetPosit() {
 
 
 /**
- * Function takes in charge of drawing of the health bar
+ * update the properties of the spaceship
  */
-function spaceshipHealth() {
-
+function updateShipProperty() {
+  healthbar.changeAnimation(HEALTH[currentHealth- 1]);
+  updateStatusBar(); // update the UI
 }
 
 function updateStatusBar() {
   rank.position.y = windowHeight - 200;
   rank.position.x = windowWidth / 2;
   rank.scale = 4;
+  
   healthbar.position.y = rank.position.y;
   healthbar.position.x = rank.position.x - 300;
   healthbar.scale = 4;
+}
+
+
+function collectFuelTank(spaceship, fueltank) {
+  console.log("I am called");
+  fueltank.remove();
+  currentHealth++;
 }
