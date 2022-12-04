@@ -26,7 +26,7 @@ let ranks = 1;
 let spaceshipAnimation_1; // normal animation
 let destroyAnimation;   // destroy animation
 let galaxyAnimation_1;
-let fueltankAnimation;
+let shildAnimation;
 
 
 // some constants
@@ -98,8 +98,8 @@ preload = function () {
   earth_img.frameDelay = 50;
 
   // load the upgrade model animations
-  fueltankAnimation = loadAnimation("./assets/props/fueltank.png", { size: [64, 64], frames: 7 });
-  fueltankAnimation.frameDelay = 2;
+  shildAnimation = loadAnimation("./assets/props/shield.png", { size: [64, 64], frames: 7 });
+  shildAnimation.frameDelay = 2;
 
   // load the bullet image
   bullet_img = loadImage("./assets/asteroids/asteroids_bullet.png");
@@ -119,7 +119,7 @@ function setup() {
   // set up the props
   fueltanks = new Group();
   let o = new Sprite();
-  o.addAni("", fueltankAnimation);
+  o.addAni("", shildAnimation);
   o.bounciness = 0.1;
   // o.removeColliders();
   o.position.x = 400;
@@ -134,7 +134,7 @@ function setup() {
   spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
   spaceship.direction = -90;
   spaceship.layer = 4;
-  spaceship.overlaps(fueltanks, collectFuelTank);
+  spaceship.overlaps(fueltanks, collectShield);
   spaceship.kinematic = true;
 
   // set up the bullets 
@@ -368,9 +368,13 @@ function updateStatusBar() {
   healthbar.scale = 1.5;
 }
 
-
-function collectFuelTank(spaceship, fueltank) {
+/**
+ * 
+ * @param {} spaceship 
+ * @param {*} shield 
+ */
+function collectShield(spaceship, shield) {
   // console.log("I am called");
-  fueltank.remove();
+  shield.remove();
   currentHealth++;
 }
