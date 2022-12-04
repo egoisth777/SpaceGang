@@ -9,7 +9,11 @@ let galaxies;
 let earth;
 let fueltanks; // group of the upgrade model
 let upgradeModel; // upgrade model across the map
+<<<<<<< HEAD
 let upgradeIcons; // upgrade Icons
+=======
+let difficulty;
+>>>>>>> d9cda322e3ca798cf4da56f30e156af045d8cd3c
 
 
 // images
@@ -116,8 +120,13 @@ preload = function () {
   destroyAnimation = loadAnimation("./assets/asteroids/explosion_particles.png", { size: [64, 64], frames: 25 });
   destroyAnimation.frameDelay = 3;
 
+<<<<<<< HEAD
   // load upgrade icon animation
   upgradeIconAnimation = loadAnimation("./assets/asteroids/upgrade_icon.png", { size: [64, 64], frames: 15});
+=======
+  asteroid_img = new Array();
+
+>>>>>>> d9cda322e3ca798cf4da56f30e156af045d8cd3c
 }
 
 
@@ -201,12 +210,13 @@ function setup() {
 
   //set up the asteroids
   asteroids = new Group();
-  asteroids.removeAll();
+  difficulty = 0;
+  // asteroids.removeAll();
   for (var i = 0; i < 10; i++) {
     var angle = random(360);
     px = width / 2 + 1000 * cos(radians(angle));
     py = random(height / 2 + 1000 * sin(radians(angle)));
-    createNewAsteroid(ceil(random(4), px, py));
+    createNewAsteroid(ceil(random(4)), px, py, difficulty);
   }
 
   // set up the upgrade icons
@@ -263,9 +273,9 @@ function createExplodeParticles(x, y, size) {
  * @param {*} y 
  * @returns 
  */
-function createNewAsteroid(type, x, y) {
+function createNewAsteroid(type, x, y, difficulty) {
   var a = createSprite(px, py, type * 20)
-  a.speed = 6 - (type);
+  a.speed = 8 - (type) + difficulty;
   a.direction = random(180);
   a.rotationSpeed = 0.5;
   a.type = type;
@@ -303,7 +313,17 @@ function draw() {
   // set up the background images
 
   // background(0);       
-  background(background_imgs[0]);
+
+  if (asteroids.length < 6){
+    difficulty++;
+    for (var i = 0; i < 10 + (difficulty); i++) {
+      var angle = random(360);
+      px = width / 2 + 1000 * cos(radians(angle));
+      py = random(height / 2 + 1000 * sin(radians(angle)));
+      setTimeout(createNewAsteroid(ceil(random(2, 4)), px, py, difficulty), 20000);
+    }
+  }
+  background(background_imgs[1]);
   // background(0);
 }
 
