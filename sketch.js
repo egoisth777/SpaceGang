@@ -146,7 +146,7 @@ function setup() {
 
 function createEarth() {
   earth.addAni("earthAni", earth_img);
-  earth.scale = 25;
+  earth.scale = 10;
   earth.position.x = windowWidth - 400;
   earth.position.y = 400;
 }
