@@ -9,11 +9,7 @@ let galaxies;
 let earth;
 let fueltanks; // group of the upgrade model
 let upgradeModel; // upgrade model across the map
-<<<<<<< HEAD
-let upgradeIcons; // upgrade Icons
-=======
 let difficulty;
->>>>>>> d9cda322e3ca798cf4da56f30e156af045d8cd3c
 
 
 // images
@@ -27,6 +23,7 @@ let bullet_img;
 let currentHealth = 5;
 let ranks = 1;
 let score = 0;
+let maxspeed = 5;
 
 
 // animations
@@ -41,7 +38,6 @@ let upgradeIconAnimation; // upgrade icon animation
 
 // some constants
 const MARGIN = 40;
-const MAXSPEED = 5;
 const MAXLIFE = 10;
 const CANVASWIDTH = 1200;
 const CANVASHEIGHT = 1200;
@@ -120,13 +116,10 @@ preload = function () {
   destroyAnimation = loadAnimation("./assets/asteroids/explosion_particles.png", { size: [64, 64], frames: 25 });
   destroyAnimation.frameDelay = 3;
 
-<<<<<<< HEAD
   // load upgrade icon animation
-  upgradeIconAnimation = loadAnimation("./assets/asteroids/upgrade_icon.png", { size: [64, 64], frames: 15});
-=======
+  upgradeIconAnimation = loadAnimation("./assets/asteroids/upgrade_icon.png", { size: [64, 64], frames: 1});
   asteroid_img = new Array();
 
->>>>>>> d9cda322e3ca798cf4da56f30e156af045d8cd3c
 }
 
 
@@ -165,6 +158,20 @@ function setup() {
   spaceship.layer = 4;
   spaceship.overlaps(fueltanks, collectShield);
   spaceship.kinematic = true;
+  spaceship.update= function(){
+    let size = upgradeIcons.size();
+    if(size > 0 && rank < 6){
+      return;
+    }
+    if(size >= 6 && size < 12){
+      maxspeed = 10;
+      return;
+    }
+    if(size >= 12){
+      maxspeed = 15;
+      return
+    }
+  }
 
   // set up the bullets 
   bullets = new Group(); // create a group of bullet
@@ -307,7 +314,7 @@ function draw() {
   spaceShipControl();    // take charge of the control block of the spaceship
   updateShipProperty();     // draw the cuzrrent health of the spaceship according to some condition
   asteroids.collide(bullets, asteroidHit);
-  asteroids.overlaps(spaceship, spaceshipHit);
+  asteroids.collide(spaceship, spaceshipHit);
   // Set the asteroids control logic
 
   // set up the background images
@@ -414,10 +421,10 @@ function spaceShipControl() {
   }
 
   if ((kb.pressing('up') || kb.pressing('W'))) {
-    if (spaceship.speed < MAXSPEED) {
+    if (spaceship.speed < maxspeed) {
       spaceship.addSpeed(0.5, spaceship.direction);
     } else {
-      spaceship.speed == MAXSPEED;
+      spaceship.speed == maxspeed;
     }
   } else {
     if (spaceship.speed > 0) {
