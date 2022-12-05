@@ -10,6 +10,7 @@ let earth;
 let fueltanks; // group of the upgrade model
 let upgradeModel; // upgrade model across the map
 let difficulty;
+let increment = 4;
 
 
 // images
@@ -157,7 +158,7 @@ function setup() {
   o.layer = 4;
   // o.collideWithOne(o, spaceShip, collectShield);
   shields.add(o);
-  fueltanks.kinematic = false;
+  shields.kinematic = false;
   // o.remove();
   // fueltanks.add(o);
 
