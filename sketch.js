@@ -16,7 +16,8 @@ let rankImage_arr;
 let healthbar_imgs;
 let background_imgs;
 let earth_img;
-let bullet_img;
+
+
 
 // tracking information
 let currentHealth = 5;
@@ -34,6 +35,8 @@ let destroyAnimation2;    // another destroy animation
 let galaxyAnimation_1;
 let shieldAnimation;
 let upgradeIconAnimation; // upgrade icon animation
+let missleAnimation;
+let bulletAnimation;
 
 // some constants
 const MARGIN = 40;
@@ -109,7 +112,7 @@ preload = function () {
   shieldAnimation.frameDelay = 2;
 
   // load the bullet image
-  bullet_img = loadImage("./assets/asteroids/asteroids_bullet.png");
+  
 
   // load spaceship destroy animation
   destroyAnimation = loadAnimation("./assets/asteroids/explosion_particles.png", { size: [64, 64], frames: 25 });
@@ -134,6 +137,10 @@ preload = function () {
   asteroid_gray_ani.frameDelay = 8;
 
 
+  // load the missle animation
+  bulletAnimation = loadAnimation("./assets/asteroids/asteroids_bullet.png", {size: [4, 4], frames: 1});
+  missleAnimation = loadAnimation("./assets/asteroids/missle_rocket.png", {size: [64, 64], frames: 3});
+  missleAnimation.frameDelay = 2;
 }
 
 
@@ -491,20 +498,19 @@ function destructor() {
 function spaceShipControl() {
 
   if (!spaceship.removed && kb.presses('J')) {
+    let size = upgradeIcons.size();
     spaceship.changeAnimation(SPAC_ANI_3);
-    // create sprites
-    let bullet = new Sprite();
-    bullet.position.x = spaceship.position.x;
-    bullet.position.y = spaceship.position.y;
-    bullet.width = 10;
-    bullet.height = 10;
-    bullet.layer = 3;
-    bullet.debug = true;
-    bullet.setSpeed(20 + spaceship.speed, spaceship.rotation);
-    // bullet.removeColliders();
-    bullet.life = 25;
-    bullet.kinematic = true;
-    bullets.add(bullet);
+    if(size >= 6 && size < 12){
+      createBullet(20, 15, spaceship.rotation, "bullet2");
+    }else if(size >= 12){
+      for(let i = 0; i < 5; i++){
+        createBullet(20, 20, i * 90, "bullet2");
+      }
+      
+    }else{
+      createBullet(15, 15, spaceship.rotation, "bullet1");
+    }
+    
   }else{
     spaceship.changeAnimation(SPAC_ANI_1);
   }
@@ -543,6 +549,37 @@ function spaceShipControl() {
       spaceship.speed = 0;
     }
   }
+
+  if((kb.presses('down') || kb.presses('S'))){
+    if (spaceship.speed > 0) {
+      if (spaceship.speed - 0.2 > 0) {
+        spaceship.speed -= 0.2;
+      } else {
+        spaceship.speed = 0;
+      }
+    } else {
+      spaceship.speed = 0;
+    }
+  }
+}
+
+function createBullet(speed, life, direction, animation){
+  let bullet = new Sprite();
+  bullet.life = life;
+  bullet.setSpeed(speed + spaceship.speed, direction);
+  bullet.addAni("bullet2", missleAnimation);
+  bullet.addAni("bullet1", bulletAnimation);
+  bullet.changeAnimation(animation);
+  bullet.scale = 3;
+  bullet.position.x = spaceship.position.x;
+  bullet.position.y = spaceship.position.y;
+  bullet.width = 10;
+  bullet.height = 10;
+  bullet.layer = 3;
+  bullet.rotation = direction - 90;
+
+  bullet.kinematic = true;
+  bullets.add(bullet);
 }
 
 function spaceshipResetPosit() {
