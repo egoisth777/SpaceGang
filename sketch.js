@@ -7,17 +7,23 @@ let healthbar;
 let bg;
 let galaxies;
 let earth;
-let fueltanks; // group of the upgrade model
+let shields; // group of the upgrade model
 let upgradeModel; // upgrade model across the map
 let difficulty;
 let increment = 4;
 
+
+
+let flag = false;
+let buttonStart;
+let counter = 0;
 
 // images
 let rankImage_arr;
 let healthbar_imgs;
 let background_imgs;
 let earth_img;
+let start_img;
 
 
 
@@ -26,6 +32,8 @@ let currentHealth = 5;
 let ranks = 1;
 let maxspeed = 5;
 let hitTracker = 0;
+let score = 0;
+
 
 // animations
 let spaceshipAnimation_1; // normal animation
@@ -93,7 +101,7 @@ preload = function () {
   spaceshipAnimation_2 = loadAnimation("./assets/spaceship/spaceship_faster.png", { size: [64, 64], frames: 4 });
   spaceshipAnimation_3 = loadAnimation("./assets/spaceship/spaceship_firepower.png", { size: [64, 64], frames: 4 });
   spaceshipAnimation_4 = loadAnimation("./assets/spaceship/spaceship_firepower.png", { size: [64, 64], frames: 4 });
-  enemyShip_img = loadAnimation("./assets/spaceship/enemy_ship.png", {size: [84, 80], frames: 1});
+  enemyShip_img = loadAnimation("./assets/spaceship/enemy_ship.png", { size: [84, 80], frames: 1 });
 
 
   galaxyAnimation_1 = loadAnimation("./assets/decorations/milky_galaxy.png", { size: [70, 70], frames: 50 });
@@ -111,45 +119,58 @@ preload = function () {
   earth_img = loadAnimation("./assets/decorations/earth_planet.png", { size: [70, 70], frames: 60 });
   earth_img.frameDelay = 10;
 
+  // load all images
+  start_img = loadImage("./assets/background/title_screen.png");
+
   // load the upgrade model animations
   shieldAnimation = loadAnimation("./assets/props/shield.png", { size: [64, 64], frames: 7 });
   shieldAnimation.frameDelay = 2;
 
   // load the bullet image
-  
+
 
   // load spaceship destroy animation
   destroyAnimation = loadAnimation("./assets/asteroids/explosion_particles.png", { size: [64, 64], frames: 25 });
   destroyAnimation.frameDelay = 3;
   destroyAnimation2 = loadAnimation("./assets/asteroids/explosion_particles_blue.png", { size: [64, 64], frames: 25 });
   destroyAnimation2.frameDelay = 3;
-  
+
 
   // load upgrade icon animation
-  upgradeIconAnimation = loadAnimation("./assets/asteroids/upgrade_icon.png", { size: [64, 64], frames: 1});
+  upgradeIconAnimation = loadAnimation("./assets/asteroids/upgrade_icon.png", { size: [64, 64], frames: 1 });
   asteroid_img = new Array();
   asteroid_img.length = 3;
-  asteroid_img[0] = loadAnimation("./assets/asteroids/brown_easy.png", {size: [64, 64], frames:1});
-  asteroid_img[1] = loadAnimation("./assets/asteroids/gray_medium_2.png", {size: [80, 80], frames:1});
-  asteroid_img[2] = loadAnimation("./assets/asteroids/black_hard_2.png", {size: [90, 90], frames:1});
+  asteroid_img[0] = loadAnimation("./assets/asteroids/brown_easy.png", { size: [64, 64], frames: 1 });
+  asteroid_img[1] = loadAnimation("./assets/asteroids/gray_medium_2.png", { size: [80, 80], frames: 1 });
+  asteroid_img[2] = loadAnimation("./assets/asteroids/black_hard_2.png", { size: [90, 90], frames: 1 });
 
-  asteroid_brown_ani = loadAnimation("./assets/asteroids/brown_easy.png", {size: [64, 64], frames: 32});
-  asteroid_gray_ani = loadAnimation("./assets/asteroids/gray_medium_2.png", {size: [80, 80], frames: 32});
-  asteroid_black_ani = loadAnimation("./assets/asteroids/black_hard_2.png", {size: [85, 85], frames: 32});
+  asteroid_brown_ani = loadAnimation("./assets/asteroids/brown_easy.png", { size: [64, 64], frames: 32 });
+  asteroid_gray_ani = loadAnimation("./assets/asteroids/gray_medium_2.png", { size: [80, 80], frames: 32 });
+  asteroid_black_ani = loadAnimation("./assets/asteroids/black_hard_2.png", { size: [85, 85], frames: 32 });
   asteroid_black_ani.frameDelay = 8;
   asteroid_brown_ani.frameDelay = 8;
   asteroid_gray_ani.frameDelay = 8;
 
 
   // load the missle animation
-  bulletAnimation = loadAnimation("./assets/asteroids/asteroids_bullet.png", {size: [4, 4], frames: 1});
-  missleAnimation = loadAnimation("./assets/asteroids/missle_rocket.png", {size: [64, 64], frames: 3});
+  bulletAnimation = loadAnimation("./assets/asteroids/asteroids_bullet.png", { size: [4, 4], frames: 1 });
+  missleAnimation = loadAnimation("./assets/asteroids/missle_rocket.png", { size: [64, 64], frames: 3 });
   missleAnimation.frameDelay = 2;
 }
 
 
 function setup() {
   createCanvas(CANVASWIDTH, CANVASWIDTH);
+  if(counter < 1){
+    buttonStart = createButton("start");
+    buttonStart.mousePressed(mousePress);
+  }
+
+  
+  if(!flag){
+    background(start_img);
+  }else{
+    
   //set some constants
   currentHealth = 5;
 
@@ -195,17 +216,18 @@ function setup() {
 
   // shields.removeColliders();
   spaceship.kinematic = true;
-  spaceship.update= function(){
+  spaceship.update = function () {
+    healthbar.changeAnimation(HEALTH[currentHealth - 1]);
     let size = upgradeIcons.size();
-    if(size > 0 && rank < 6){
+    if (size > 0 && rank < 6) {
       return;
     }
-    if(size >= 6 && size < 12){
+    if (size >= 6 && size < 12) {
       spaceship.addAni(SPAC_ANI_4);
       maxspeed = 8;
       return;
     }
-    if(size >= 12){
+    if (size >= 12) {
       spaceship.addAni(SPAC_ANI_2);
       maxspeed = 10;
       return
@@ -226,17 +248,17 @@ function setup() {
   rank.position.y = CANVASHEIGHT - 100;
   rank.position.x = CANVASWIDTH / 2;
   rank.scale = 1.5;
-  rank.update = function(){
+  rank.update = function () {
     let size = upgradeIcons.size();
-    if(size > 0 && rank < 6){
+    if (size > 0 && rank < 6) {
       rank.changeAnimation(RANK1);
       return;
     }
-    if(size >= 6 && size < 12){
+    if (size >= 6 && size < 12) {
       rank.changeAnimation(RANK2);
       return;
     }
-    if(size >= 12){
+    if (size >= 12) {
       rank.changeAnimation(RANK3);
       return
     }
@@ -267,6 +289,9 @@ function setup() {
 
   // set up the upgrade icons
   upgradeIcons = new Group();
+  }
+
+
 }
 
 function createEarth() {
@@ -319,7 +344,7 @@ function createExplodeParticles(x, y, size) {
  * @param {*} y 
  * @param {*} size 
  */
- function createExplodeParticles_blue(x, y, size) {
+function createExplodeParticles_blue(x, y, size) {
   let particles = new Sprite();
   particles.scale = size;
   particles.x = x;
@@ -337,7 +362,7 @@ function createExplodeParticles(x, y, size) {
  * @returns 
  */
 function createNewAsteroid(type, x, y, difficulty) {
-  var a = createSprite(px, py, type * 30)
+  var a = createSprite(x, y, type * 30)
   a.speed = 6 - (type) + difficulty;
   a.direction = random(180);
   a.rotationSpeed = 0.5;
@@ -365,7 +390,7 @@ function createNewAsteroid(type, x, y, difficulty) {
   return a;
 }
 
-function createShield(){
+function createShield() {
   let o = new Sprite();
   o.addAni("", shieldAnimation);
   // o.kinematic = true;
@@ -377,64 +402,78 @@ function createShield(){
   shields.add(o);
 }
 
+function mousePress(){
+    console.log("i am called");
+    counter = 1;
+    flag = true;
+    setup();
+}
 
 function draw() {
+ 
 
-  // increment = 1;
-  clear();
-  spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary      
+  if (!flag) {
+    background(start_img);
+  } else {
 
-  spaceShipControl();    // take charge of the control block of the spaceship
-  spaceship.collide(shields, collectShield);
-  asteroids.collide(bullets, asteroidHit);
-  asteroids.collide(spaceship, spaceshipHit);
-  enemy.position.x += increment;
-  if (enemy.position.x > CANVASWIDTH - 40 || enemy.position.x < 40){
-    increment *= -1;
-  }
+    clear();
+    spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary      
 
-  if (asteroids.length < 6){
-    difficulty++;
-    for (var i = 0; i < 10 + (difficulty); i++) {
-      var angle = random(360);
-      px = width / 2 + 1000 * cos(radians(angle));
-      py = random(height / 2 + 1000 * sin(radians(angle)));
-      setTimeout(createNewAsteroid(ceil(random(3)), px, py, difficulty), 20000);
+
+
+    spaceShipControl();    // take charge of the control block of the spaceship
+    spaceship.collide(shields, collectShield);
+    asteroids.collide(bullets, asteroidHit);
+    asteroids.collide(spaceship, spaceshipHit);
+    enemy.position.x += increment;
+    if (enemy.position.x > CANVASWIDTH - 40 || enemy.position.x < 40) {
+      increment *= -1;
     }
-    // let t = new Sprite();
-    // t.addAni("", shieldAnimation);
-    // t.bounciness = 0;
-    // // o.removeColliders();
-    // t.position.x = floor(random(1200));
-    // t.position.y = random(floor(1200));
-    // t.scale = 0.8;
-    // t.layer = 4;
-    // // o.collideWithOne(o, spaceShip, collectShield);
-    // fueltanks.add(o);
-    // spaceship.overlaps(fueltanks, collectShield);
+
+    if (asteroids.length < 6) {
+      difficulty++;
+      for (var i = 0; i < 10 + (difficulty); i++) {
+        var angle = random(360);
+        px = width / 2 + 1000 * cos(radians(angle));
+        py = random(height / 2 + 1000 * sin(radians(angle)));
+        setTimeout(createNewAsteroid(ceil(random(3)), px, py, difficulty), 20000);
+      }
+      // let t = new Sprite();
+      // t.addAni("", shieldAnimation);
+      // t.bounciness = 0;
+      // // o.removeColliders();
+      // t.position.x = floor(random(1200));
+      // t.position.y = random(floor(1200));
+      // t.scale = 0.8;
+      // t.layer = 4;
+      // // o.collideWithOne(o, spaceShip, collectShield);
+      // fueltanks.add(o);
+      // spaceship.overlaps(fueltanks, collectShield);
+    }
+    background(background_imgs[1]);
+    // background(0);
   }
-  background(background_imgs[1]);
-  // background(0);
 }
 
 function spaceshipHit(spaceship, sprite) {
   createExplodeParticles(spaceship.position.x, spaceship.position.y, 2);
   currentHealth--;
   if (currentHealth == 0) {
-    spaceship.changeAnimation(SPAC_ANI_2);
+    // spaceship.changeAnimation(SPAC_ANI_2);
     destructor();
   }
 }
 
 function asteroidHit(asteroid, sprite) {
+
   if (sprite.removed) {
     return;
   }
-  
+  score += 10;
   hitTracker += 1;
   hitTracker %= 4;
-  console.log(hitTracker);
-  if(hitTracker == 3){
+  // console.log(hitTracker);
+  if (hitTracker == 3) {
     createShield();
   }
   // create shield every four hit
@@ -444,15 +483,18 @@ function asteroidHit(asteroid, sprite) {
   o.removeColliders();
   o.addAni("upgradeIconAnimation", upgradeIconAnimation);
   let size = upgradeIcons.size();
-  o.position.x = rank.position.x + 80  + 30 * (size % 6);
+  o.position.x = rank.position.x + 80 + 30 * (size % 6);
   o.position.y = rank.position.y + 30 * floor((size / 6));
   upgradeIcons.add(o);
   createExplodeParticles_blue(asteroid.position.x, asteroid.position.y, 4);
-  if (asteroid.type == 3){
+  if (asteroid.type == 3) {
     let destroy = new Sprite();
     destroy.x = asteroid.position.x;
     destroy.y = asteroid.position.y;
     destroy.addAni("destroy_black", asteroid_black_ani);
+    for (let i = 0; i < 2; i++) {
+      createNewAsteroid(2, asteroid.position.x, asteroid.position.y, 1);
+    }
     // if (asteroid.health == 0) { asteroid.remove(); }
     // else {
     // asteroid.health--;
@@ -462,11 +504,15 @@ function asteroidHit(asteroid, sprite) {
     // destroy.removeColliders();
     destroy.life = 20;
   }
-  if (asteroid.type == 2){
+  if (asteroid.type == 2) {
     let destroy = new Sprite();
     destroy.x = asteroid.position.x;
     destroy.y = asteroid.position.y;
     destroy.addAni("destroy_gray", asteroid_gray_ani);
+    for (let i = 0; i < 2; i++) {
+      console.log(i);
+      createNewAsteroid(1, asteroid.position.x, asteroid.position.y, 1);
+    }
     // if (asteroid.health > 0) { 
     //   // asteroid.collectShield
     //   asteroid.immovable = true;
@@ -481,18 +527,18 @@ function asteroidHit(asteroid, sprite) {
     // destroy.removeColliders();
     destroy.life = 20;
   }
-  if (asteroid.type == 1){
+  if (asteroid.type == 1) {
     let destroy = new Sprite();
     destroy.x = asteroid.position.x;
     destroy.y = asteroid.position.y;
     destroy.addAni("destroy_brown", asteroid_brown_ani);
-  //   if (asteroid.health == 0) { asteroid.remove(); }
-  //   else {
-  //   asteroid.health--;
-  //   // asteroid.removeColliders();
-  //   sprite.remove();
-  //   }
-  //   // destroy.removeColliders();
+    //   if (asteroid.health == 0) { asteroid.remove(); }
+    //   else {
+    //   asteroid.health--;
+    //   // asteroid.removeColliders();
+    //   sprite.remove();
+    //   }
+    //   // destroy.removeColliders();
     destroy.life = 20;
   }
   sprite.remove();
@@ -501,12 +547,12 @@ function asteroidHit(asteroid, sprite) {
 
 // place holder function
 // comment out this code if you don't want to see the screen
-// function gameOver(){
-//   background('red');
-//   textSize(40);
-//   text("Game Over", 300, 300);
-//   exit();
-// }
+function gameOver() {
+  background('red');
+  textSize(40);
+  text("Game Over", 300, 300);
+  exit();
+}
 
 
 /**
@@ -514,9 +560,11 @@ function asteroidHit(asteroid, sprite) {
  * initialized value when restarted
  */
 function destructor() {
-  spaceship.remove();
-  asteroids.removeAll();
-  galaxies.removeAll();
+  allSprites.remove();
+  // gameOver();
+  flag = false;
+  counter = 0;
+  buttonStart.remove();
   setup();
 }
 
@@ -525,18 +573,17 @@ function spaceShipControl() {
   if (!spaceship.removed && kb.presses('J')) {
     let size = upgradeIcons.size();
     spaceship.changeAnimation(SPAC_ANI_3);
-    if(size >= 6 && size < 12){
+    if (size >= 6 && size < 12) {
       createBullet(20, 15, spaceship.rotation, "bullet2");
-    }else if(size >= 12){
-      for(let i = 0; i < 5; i++){
+    } else if (size >= 12) {
+      for (let i = 0; i < 5; i++) {
         createBullet(20, 20, i * 90, "bullet2");
       }
-      
-    }else{
+    } else {
       createBullet(15, 15, spaceship.rotation, "bullet1");
     }
-    
-  }else{
+
+  } else {
     spaceship.changeAnimation(SPAC_ANI_1);
   }
   // spaceship.direction -= 90; // adjust the rotation direction
@@ -575,7 +622,7 @@ function spaceShipControl() {
     }
   }
 
-  if((kb.presses('down') || kb.presses('S'))){
+  if ((kb.presses('down') || kb.presses('S'))) {
     if (spaceship.speed > 0) {
       if (spaceship.speed - 0.2 > 0) {
         spaceship.speed -= 0.2;
@@ -588,7 +635,7 @@ function spaceShipControl() {
   }
 }
 
-function createBullet(speed, life, direction, animation){
+function createBullet(speed, life, direction, animation) {
   let bullet = new Sprite();
   bullet.life = life;
   bullet.setSpeed(speed + spaceship.speed, direction);
@@ -626,13 +673,6 @@ function spaceshipResetPosit() {
 }
 
 
-/**
- * update the properties of the spaceship
- */
-function updateShipProperty() {
-  healthbar.changeAnimation(HEALTH[currentHealth - 1]);
-}
-
 
 /**
  * 
@@ -641,6 +681,7 @@ function updateShipProperty() {
  */
 function collectShield(spaceship, shield) {
   // console.log("I am called");
+  // console.log(currentHealth);
   shield.remove();
   currentHealth++;
 }
