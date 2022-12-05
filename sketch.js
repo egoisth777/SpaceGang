@@ -206,12 +206,12 @@ function setup() {
   createEarth();
   createGalaxies();
 
-  enemy = new Sprite();
-  enemy.addImage("enemy", enemyShip_img);
-  enemy.layer = 4;
-  enemy.kinematic = true;
-  enemy.rotation = 180;
-  enemy.position.y = 100;
+  // enemy = new Sprite();
+  // enemy.addImage("enemy", enemyShip_img);
+  // enemy.layer = 4;
+  // enemy.kinematic = true;
+  // enemy.rotation = 180;
+  // enemy.position.y = 100;
 
   // set up the spaceship
   spaceship = new Sprite(); // create the main character
@@ -433,12 +433,12 @@ function draw() {
     spaceship.collide(shields, collectShield);
     asteroids.collide(bullets, asteroidHit);
     asteroids.collide(spaceship, spaceshipHit);
-    enemy.position.x += increment;
-    if (enemy.position.x > CANVASWIDTH - 40 || enemy.position.x < 40) {
-      increment *= -1;
-    }
+    // enemy.position.x += increment;
+    // if (enemy.position.x > CANVASWIDTH - 40 || enemy.position.x < 40) {
+    //   increment *= -1;
+    // }
 
-    if (asteroids.length < 6) {
+    if (asteroids.length < 8) {
       difficulty++;
       for (var i = 0; i < 10 + (difficulty*2); i++) {
         var angle = random(360);
@@ -578,7 +578,7 @@ function destructor() {
 
 function spaceShipControl() {
 
-  if (!spaceship.removed && kb.presses('J')) {
+  if (!spaceship.removed && kb.presses('x')) {
     let size = upgradeIcons.size();
     spaceship.changeAnimation(SPAC_ANI_3);
     if (size >= 6 && size < 12) {
