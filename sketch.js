@@ -11,7 +11,6 @@ let shields; // group of the upgrade model
 let upgradeModel; // upgrade model across the map
 let difficulty;
 
-
 // images
 let rankImage_arr;
 let healthbar_imgs;
@@ -22,9 +21,8 @@ let bullet_img;
 // tracking information
 let currentHealth = 5;
 let ranks = 1;
-let score = 0;
 let maxspeed = 5;
-
+let hitTracker = 0;
 
 // animations
 let spaceshipAnimation_1; // normal animation
@@ -146,7 +144,7 @@ function setup() {
 
 
   // set up the props and decorations across the map
-  fueltanks = new Group();
+  shields = new Group();
   let o = new Sprite();
   o.addAni("", shieldAnimation);
   o.bounciness = 0;
@@ -156,7 +154,7 @@ function setup() {
   o.scale = 0.8;
   o.layer = 4;
   // o.collideWithOne(o, spaceShip, collectShield);
-  fueltanks.add(o);
+  shields.add(o);
 
 
   // set up earth and galaxies
@@ -174,8 +172,8 @@ function setup() {
   spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
   spaceship.rotation -= 90;
   spaceship.layer = 4;
-  spaceship.overlaps(fueltanks, collectShield);
-  // fueltanks.removeColliders();
+
+  // shields.removeColliders();
   spaceship.kinematic = true;
   spaceship.update= function(){
     healthbar.changeAnimation(HEALTH[currentHealth - 1]);
@@ -185,12 +183,12 @@ function setup() {
     }
     if(size >= 6 && size < 12){
       spaceship.addAni(SPAC_ANI_4);
-      maxspeed = 10;
+      maxspeed = 8;
       return;
     }
     if(size >= 12){
       spaceship.addAni(SPAC_ANI_2);
-      maxspeed = 15;
+      maxspeed = 10;
       return
     }
   }
@@ -351,15 +349,15 @@ function createNewAsteroid(type, x, y, difficulty) {
   return a;
 }
 
-function create(){
+function createShield(){
   let o = new Sprite();
   o.addAni("", shieldAnimation);
-  o.bounciness = 0.1;
-  // o.removeColliders();
-  o.position.x = 400;
-  o.position.y = 400;
-  o.scale = 0.5;
+  // o.kinematic = true;
+  o.position.x = floor(random(1200));
+  o.position.y = random(floor(1200));
+  o.scale = 0.8;
   o.layer = 4;
+  // o.collideWithOne(o, spaceShip, collectShield);
   shields.add(o);
 }
 
@@ -370,14 +368,9 @@ function draw() {
   spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary      
 
   spaceShipControl();    // take charge of the control block of the spaceship
-  updateShipProperty();     // draw the cuzrrent health of the spaceship according to some condition
+  spaceship.collide(shields, collectShield);
   asteroids.collide(bullets, asteroidHit);
   asteroids.collide(spaceship, spaceshipHit);
-  // Set the asteroids control logic
-
-  // set up the background images
-
-  // background(0);       
 
   if (asteroids.length < 6){
     difficulty++;
@@ -387,16 +380,6 @@ function draw() {
       py = random(height / 2 + 1000 * sin(radians(angle)));
       setTimeout(createNewAsteroid(ceil(random(3)), px, py, difficulty), 20000);
     }
-    let o = new Sprite();
-    o.addAni("", shieldAnimation);
-    o.bounciness = 0;
-    // o.removeColliders();
-    o.position.x = floor(random(1200));
-    o.position.y = random(floor(1200));
-    o.scale = 0.8;
-    o.layer = 4;
-    // o.collideWithOne(o, spaceShip, collectShield);
-    fueltanks.add(o);
   }
   background(background_imgs[1]);
   // background(0);
@@ -415,6 +398,14 @@ function asteroidHit(asteroid, sprite) {
   if (sprite.removed) {
     return;
   }
+  
+  hitTracker += 1;
+  hitTracker %= 4;
+  console.log(hitTracker);
+  if(hitTracker == 3){
+    createShield();
+  }
+  // create shield every four hit
 
   // get score from hitting the asteroids
   let o = new Sprite();
@@ -509,7 +500,7 @@ function spaceShipControl() {
     bullet.height = 10;
     bullet.layer = 3;
     bullet.debug = true;
-    bullet.setSpeed(20 + spaceship.speed, spaceship.direction);
+    bullet.setSpeed(20 + spaceship.speed, spaceship.rotation);
     // bullet.removeColliders();
     bullet.life = 25;
     bullet.kinematic = true;
@@ -518,25 +509,26 @@ function spaceShipControl() {
     spaceship.changeAnimation(SPAC_ANI_1);
   }
   // spaceship.direction -= 90; // adjust the rotation direction
-  console.log(spaceship.direction);
-  console.log(spaceship.rotation);
-  console.log(spaceship.speed);
+  // console.log(spaceship.direction);
+  // console.log(spaceship.rotation);
+  // console.log(spaceship.speed);
   // control the player movement
   if (kb.presses('left') || kb.presses('A') || kb.pressing('left') || kb.pressing('A')) {
     // (direction, speed, distance)
     spaceship.rotation -= 3;
     spaceship.direction -= 3;
+    spaceship.rotaion = spaceship.direction;
   }
 
   if (kb.presses('right') || kb.presses('D') || kb.pressing('right') || kb.pressing('D')) {
     spaceship.rotation += 3;
     spaceship.direction += 3;
-    spaceship.direction %= 360;
+    spaceship.rotation = spaceship.direction;
   }
 
   if ((kb.pressing('up') || kb.pressing('W'))) {
     if (spaceship.speed < maxspeed) {
-      spaceship.addSpeed(0.5, spaceship.direction);
+      spaceship.addSpeed(0.5, spaceship.rotation);
     } else {
       spaceship.speed == maxspeed;
     }
