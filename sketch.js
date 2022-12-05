@@ -162,7 +162,14 @@ preload = function () {
 function setup() {
   createCanvas(CANVASWIDTH, CANVASWIDTH);
   if(counter < 1){
-    buttonStart = createButton("start");
+    buttonStart = createButton("NEW GAME");
+    buttonStart.position(550, 1000);
+    buttonStart.style('font-size', '30px');
+    buttonStart.style('color', 'white');
+    buttonStart.style('font-family', 'helvetica');
+    buttonStart.style('background-color', 'navy');
+    buttonStart.size(150, 100);
+
     buttonStart.mousePressed(mousePress);
   }
 
@@ -170,7 +177,8 @@ function setup() {
   if(!flag){
     background(start_img);
   }else{
-    
+  
+    buttonStart.remove();
   //set some constants
   currentHealth = 5;
 
@@ -363,7 +371,7 @@ function createExplodeParticles_blue(x, y, size) {
  */
 function createNewAsteroid(type, x, y, difficulty) {
   var a = createSprite(x, y, type * 30)
-  a.speed = 6 - (type) + difficulty;
+  a.speed = 6 - (type) + (difficulty*2);
   a.direction = random(180);
   a.rotationSpeed = 0.5;
   a.type = type;
@@ -432,7 +440,7 @@ function draw() {
 
     if (asteroids.length < 6) {
       difficulty++;
-      for (var i = 0; i < 10 + (difficulty); i++) {
+      for (var i = 0; i < 10 + (difficulty*2); i++) {
         var angle = random(360);
         px = width / 2 + 1000 * cos(radians(angle));
         py = random(height / 2 + 1000 * sin(radians(angle)));
