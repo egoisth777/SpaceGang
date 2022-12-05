@@ -170,7 +170,7 @@ function setup() {
   spaceship.addAni(SPAC_ANI_3, spaceshipAnimation_3);
   spaceship.addAni(SPAC_ANI_2, spaceshipAnimation_2);
   spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
-  spaceship.direction = -90;
+  // spaceship.direction = -90;
   spaceship.layer = 4;
   spaceship.overlaps(fueltanks, collectShield);
   spaceship.kinematic = true;
@@ -481,9 +481,9 @@ function spaceShipControl() {
     spaceship.changeAnimation(SPAC_ANI_1);
   }
   // spaceship.direction -= 90; // adjust the rotation direction
-  // console.log(spaceship.direction);
-  // console.log(spaceship.rotation);
-  // console.log(spaceship.speed);
+  console.log(spaceship.direction);
+  console.log(spaceship.rotation);
+  console.log(spaceship.speed);
   // control the player movement
   if (kb.presses('left') || kb.presses('A') || kb.pressing('left') || kb.pressing('A')) {
     // (direction, speed, distance)
@@ -492,9 +492,9 @@ function spaceShipControl() {
   }
 
   if (kb.presses('right') || kb.presses('D') || kb.pressing('right') || kb.pressing('D')) {
-    // (direction, speed, distance)
     spaceship.rotation += 3;
     spaceship.direction += 3;
+    spaceship.direction %= 360;
   }
 
   if ((kb.pressing('up') || kb.pressing('W'))) {
