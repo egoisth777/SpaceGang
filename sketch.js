@@ -7,9 +7,11 @@ let healthbar;
 let bg;
 let galaxies;
 let earth;
-let shields; // group of the upgrade model
+let fueltanks; // group of the upgrade model
 let upgradeModel; // upgrade model across the map
 let difficulty;
+let increment = 4;
+
 
 // images
 let rankImage_arr;
@@ -34,6 +36,7 @@ let destroyAnimation;     // destroy animation
 let destroyAnimation2;    // another destroy animation
 let galaxyAnimation_1;
 let shieldAnimation;
+let enemyShip_img;
 let upgradeIconAnimation; // upgrade icon animation
 let missleAnimation;
 let bulletAnimation;
@@ -90,6 +93,7 @@ preload = function () {
   spaceshipAnimation_2 = loadAnimation("./assets/spaceship/spaceship_faster.png", { size: [64, 64], frames: 4 });
   spaceshipAnimation_3 = loadAnimation("./assets/spaceship/spaceship_firepower.png", { size: [64, 64], frames: 4 });
   spaceshipAnimation_4 = loadAnimation("./assets/spaceship/spaceship_firepower.png", { size: [64, 64], frames: 4 });
+  enemyShip_img = loadAnimation("./assets/spaceship/enemy_ship.png", {size: [84, 80], frames: 1});
 
 
   galaxyAnimation_1 = loadAnimation("./assets/decorations/milky_galaxy.png", { size: [70, 70], frames: 50 });
@@ -149,7 +153,6 @@ function setup() {
   //set some constants
   currentHealth = 5;
 
-
   // set up the props and decorations across the map
   shields = new Group();
   let o = new Sprite();
@@ -162,6 +165,9 @@ function setup() {
   o.layer = 4;
   // o.collideWithOne(o, spaceShip, collectShield);
   shields.add(o);
+  shields.kinematic = false;
+  // o.remove();
+  // fueltanks.add(o);
 
 
   // set up earth and galaxies
@@ -171,19 +177,25 @@ function setup() {
   createEarth();
   createGalaxies();
 
+  enemy = new Sprite();
+  enemy.addImage("enemy", enemyShip_img);
+  enemy.layer = 4;
+  enemy.kinematic = true;
+  enemy.rotation = 180;
+  enemy.position.y = 100;
+
   // set up the spaceship
   spaceship = new Sprite(); // create the main character
   spaceship.addAni(SPAC_ANI_4, spaceshipAnimation_4);
   spaceship.addAni(SPAC_ANI_3, spaceshipAnimation_3);
   spaceship.addAni(SPAC_ANI_2, spaceshipAnimation_2);
   spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
-  spaceship.rotation -= 90;
+  // spaceship.direction = -90;
   spaceship.layer = 4;
 
   // shields.removeColliders();
   spaceship.kinematic = true;
   spaceship.update= function(){
-    healthbar.changeAnimation(HEALTH[currentHealth - 1]);
     let size = upgradeIcons.size();
     if(size > 0 && rank < 6){
       return;
@@ -317,9 +329,6 @@ function createExplodeParticles(x, y, size) {
   particles.life = 30;
 }
 
-
-
-
 /**
  * Create asteroids
  * @param {*} type 
@@ -371,6 +380,7 @@ function createShield(){
 
 function draw() {
 
+  // increment = 1;
   clear();
   spaceshipResetPosit(); // reset the position of the spaceship if out of the boundary      
 
@@ -378,6 +388,10 @@ function draw() {
   spaceship.collide(shields, collectShield);
   asteroids.collide(bullets, asteroidHit);
   asteroids.collide(spaceship, spaceshipHit);
+  enemy.position.x += increment;
+  if (enemy.position.x > CANVASWIDTH - 40 || enemy.position.x < 40){
+    increment *= -1;
+  }
 
   if (asteroids.length < 6){
     difficulty++;
@@ -387,6 +401,17 @@ function draw() {
       py = random(height / 2 + 1000 * sin(radians(angle)));
       setTimeout(createNewAsteroid(ceil(random(3)), px, py, difficulty), 20000);
     }
+    // let t = new Sprite();
+    // t.addAni("", shieldAnimation);
+    // t.bounciness = 0;
+    // // o.removeColliders();
+    // t.position.x = floor(random(1200));
+    // t.position.y = random(floor(1200));
+    // t.scale = 0.8;
+    // t.layer = 4;
+    // // o.collideWithOne(o, spaceShip, collectShield);
+    // fueltanks.add(o);
+    // spaceship.overlaps(fueltanks, collectShield);
   }
   background(background_imgs[1]);
   // background(0);
@@ -599,6 +624,15 @@ function spaceshipResetPosit() {
     }
   }
 }
+
+
+/**
+ * update the properties of the spaceship
+ */
+function updateShipProperty() {
+  healthbar.changeAnimation(HEALTH[currentHealth - 1]);
+}
+
 
 /**
  * 
