@@ -7,7 +7,7 @@ let healthbar;
 let bg;
 let galaxies;
 let earth;
-let fueltanks; // group of the upgrade model
+let shields; // group of the upgrade model
 let upgradeModel; // upgrade model across the map
 let difficulty;
 
@@ -144,19 +144,10 @@ function setup() {
   //set some constants
   currentHealth = 5;
 
+
   // set up the props and decorations across the map
-  fueltanks = new Group();
-  let o = new Sprite();
-  o.addAni("", shieldAnimation);
-  o.bounciness = 0.1;
-  // o.removeColliders();
-  o.position.x = 400;
-  o.position.y = 400;
-  o.scale = 0.5;
-  o.layer = 4;
-  fueltanks.add(o);
-
-
+  shields = new Group();
+  
   // set up earth and galaxies
   galaxies = new Group();
   earth = new Sprite();
@@ -170,11 +161,12 @@ function setup() {
   spaceship.addAni(SPAC_ANI_3, spaceshipAnimation_3);
   spaceship.addAni(SPAC_ANI_2, spaceshipAnimation_2);
   spaceship.addAni(SPAC_ANI_1, spaceshipAnimation_1);
-  // spaceship.direction = -90;
+  spaceship.rotation -= 90;
   spaceship.layer = 4;
-  spaceship.overlaps(fueltanks, collectShield);
+  spaceship.overlaps(shields, collectShield);
   spaceship.kinematic = true;
   spaceship.update= function(){
+    healthbar.changeAnimation(HEALTH[currentHealth - 1]);
     let size = upgradeIcons.size();
     if(size > 0 && rank < 6){
       return;
@@ -308,6 +300,9 @@ function createExplodeParticles(x, y, size) {
   particles.life = 30;
 }
 
+
+
+
 /**
  * Create asteroids
  * @param {*} type 
@@ -342,6 +337,18 @@ function createNewAsteroid(type, x, y, difficulty) {
   a.mass = 2 + a.scale;
   asteroids.add(a);
   return a;
+}
+
+function create(){
+  let o = new Sprite();
+  o.addAni("", shieldAnimation);
+  o.bounciness = 0.1;
+  // o.removeColliders();
+  o.position.x = 400;
+  o.position.y = 400;
+  o.scale = 0.5;
+  o.layer = 4;
+  shields.add(o);
 }
 
 
@@ -533,15 +540,6 @@ function spaceshipResetPosit() {
     }
   }
 }
-
-
-/**
- * update the properties of the spaceship
- */
-function updateShipProperty() {
-  healthbar.changeAnimation(HEALTH[currentHealth - 1]);
-}
-
 
 /**
  * 
