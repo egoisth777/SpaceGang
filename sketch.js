@@ -148,12 +148,13 @@ function setup() {
   fueltanks = new Group();
   let o = new Sprite();
   o.addAni("", shieldAnimation);
-  o.bounciness = 0.1;
+  o.bounciness = 0;
   // o.removeColliders();
   o.position.x = 400;
   o.position.y = 400;
-  o.scale = 0.5;
+  o.scale = 0.8;
   o.layer = 4;
+  // o.collideWithOne(o, spaceShip, collectShield);
   fueltanks.add(o);
 
 
@@ -173,6 +174,7 @@ function setup() {
   spaceship.direction = -90;
   spaceship.layer = 4;
   spaceship.overlaps(fueltanks, collectShield);
+  // fueltanks.removeColliders();
   spaceship.kinematic = true;
   spaceship.update= function(){
     let size = upgradeIcons.size();
@@ -368,6 +370,16 @@ function draw() {
       py = random(height / 2 + 1000 * sin(radians(angle)));
       setTimeout(createNewAsteroid(ceil(random(3)), px, py, difficulty), 20000);
     }
+    let o = new Sprite();
+    o.addAni("", shieldAnimation);
+    o.bounciness = 0;
+    // o.removeColliders();
+    o.position.x = floor(random(1200));
+    o.position.y = random(floor(1200));
+    o.scale = 0.8;
+    o.layer = 4;
+    // o.collideWithOne(o, spaceShip, collectShield);
+    fueltanks.add(o);
   }
   background(background_imgs[1]);
   // background(0);
@@ -402,11 +414,12 @@ function asteroidHit(asteroid, sprite) {
     destroy.y = asteroid.position.y;
     destroy.addAni("destroy_black", asteroid_black_ani);
     // if (asteroid.health == 0) { asteroid.remove(); }
-    // else{
+    // else {
     // asteroid.health--;
+    // // asteroid.removeColliders();
     // sprite.remove();
     // }
-    destroy.removeColliders();
+    // destroy.removeColliders();
     destroy.life = 20;
   }
   if (asteroid.type == 2){
@@ -414,12 +427,18 @@ function asteroidHit(asteroid, sprite) {
     destroy.x = asteroid.position.x;
     destroy.y = asteroid.position.y;
     destroy.addAni("destroy_gray", asteroid_gray_ani);
-    // if (asteroid.health == 0) { asteroid.remove(); }
-    // else{
-    // asteroid.health--;
-    // sprite.remove();
+    // if (asteroid.health > 0) { 
+    //   // asteroid.collectShield
+    //   asteroid.immovable = true;
+    //   asteroid.health--;
+    //   asteroid.immovable = false;
+    //   sprite.remove();
     // }
-    destroy.removeColliders();
+    // else {
+    //   asteroid.immovable = false;
+    //   asteroid.remove();
+    // }
+    // destroy.removeColliders();
     destroy.life = 20;
   }
   if (asteroid.type == 1){
@@ -427,12 +446,13 @@ function asteroidHit(asteroid, sprite) {
     destroy.x = asteroid.position.x;
     destroy.y = asteroid.position.y;
     destroy.addAni("destroy_brown", asteroid_brown_ani);
-    // if (asteroid.health == 0) { asteroid.remove(); }
-    // else{
-    // asteroid.health--;
-    // sprite.remove();
-    // }
-    destroy.removeColliders();
+  //   if (asteroid.health == 0) { asteroid.remove(); }
+  //   else {
+  //   asteroid.health--;
+  //   // asteroid.removeColliders();
+  //   sprite.remove();
+  //   }
+  //   // destroy.removeColliders();
     destroy.life = 20;
   }
   sprite.remove();
@@ -474,7 +494,7 @@ function spaceShipControl() {
     bullet.debug = true;
     bullet.setSpeed(20 + spaceship.speed, spaceship.direction);
     // bullet.removeColliders();
-    bullet.life = 20;
+    bullet.life = 25;
     bullet.kinematic = true;
     bullets.add(bullet);
   }else{
