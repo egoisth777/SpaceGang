@@ -32,6 +32,7 @@ let spaceshipAnimation_2; // faster animation
 let spaceshipAnimation_3; // firing power animation
 let spaceshipAnimation_4; // fuel animation
 let destroyAnimation;     // destroy animation
+let destroyAnimation2;    // another destroy animation
 let galaxyAnimation_1;
 let shieldAnimation;
 let upgradeIconAnimation; // upgrade icon animation
@@ -115,6 +116,9 @@ preload = function () {
   // load spaceship destroy animation
   destroyAnimation = loadAnimation("./assets/asteroids/explosion_particles.png", { size: [64, 64], frames: 25 });
   destroyAnimation.frameDelay = 3;
+  destroyAnimation2 = loadAnimation("./assets/asteroids/explosion_particles_blue.png", { size: [64, 64], frames: 25 });
+  destroyAnimation2.frameDelay = 3;
+  
 
   // load upgrade icon animation
   upgradeIconAnimation = loadAnimation("./assets/asteroids/upgrade_icon.png", { size: [64, 64], frames: 1});
@@ -276,6 +280,23 @@ function createExplodeParticles(x, y, size) {
 }
 
 /**
+ * Create particles at current location
+ * 
+ * @param {*} x 
+ * @param {*} y 
+ * @param {*} size 
+ */
+ function createExplodeParticles_blue(x, y, size) {
+  let particles = new Sprite();
+  particles.scale = size;
+  particles.x = x;
+  particles.y = y;
+  particles.removeColliders();
+  particles.addAni("destroy", destroyAnimation2);
+  particles.life = 30;
+}
+
+/**
  * Create asteroids
  * @param {*} type 
  * @param {*} x 
@@ -358,7 +379,7 @@ function asteroidHit(asteroid, sprite) {
   o.position.x = rank.position.x + 80  + 30 * (size % 6);
   o.position.y = rank.position.y + 30 * floor((size / 6));
   upgradeIcons.add(o);
-
+  createExplodeParticles_blue(asteroid.position.x, asteroid.position.y, 4);
   sprite.remove();
   asteroid.remove();
 }
@@ -395,7 +416,6 @@ function spaceShipControl() {
     bullet.width = 10;
     bullet.height = 10;
     bullet.layer = 3;
-    bullet.color = '#66CCFF';
     bullet.debug = true;
     bullet.setSpeed(20 + spaceship.speed, spaceship.direction);
     // bullet.removeColliders();
