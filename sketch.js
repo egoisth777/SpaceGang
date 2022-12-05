@@ -99,8 +99,8 @@ preload = function () {
   rankImage_arr.forEach(s => s.frameDelay = 20);
 
   // load earth animation
-  earth_img = loadAnimation("./assets/decorations/earth_planet.png", { size: [70, 70], frames: 50 });
-  earth_img.frameDelay = 50;
+  earth_img = loadAnimation("./assets/decorations/earth_planet.png", { size: [70, 70], frames: 60 });
+  earth_img.frameDelay = 10;
 
   // load the upgrade model animations
   shieldAnimation = loadAnimation("./assets/props/shield.png", { size: [64, 64], frames: 7 });
@@ -114,6 +114,18 @@ preload = function () {
   destroyAnimation.frameDelay = 3;
 
   asteroid_img = new Array();
+  asteroid_img.length = 3;
+  asteroid_img[0] = loadAnimation("./assets/asteroids/brown_easy.png", {size: [64, 64], frames:1});
+  asteroid_img[1] = loadAnimation("./assets/asteroids/gray_medium_2.png", {size: [80, 80], frames:1});
+  asteroid_img[2] = loadAnimation("./assets/asteroids/black_hard_2.png", {size: [90, 90], frames:1});
+
+  asteroid_brown_ani = loadAnimation("./assets/asteroids/brown_easy.png", {size: [64, 64], frames: 32});
+  asteroid_gray_ani = loadAnimation("./assets/asteroids/gray_medium_2.png", {size: [80, 80], frames: 32});
+  asteroid_black_ani = loadAnimation("./assets/asteroids/black_hard_2.png", {size: [85, 85], frames: 32});
+  asteroid_black_ani.frameDelay = 8;
+  asteroid_brown_ani.frameDelay = 8;
+  asteroid_gray_ani.frameDelay = 8;
+
 
 }
 
@@ -188,7 +200,7 @@ function setup() {
     var angle = random(360);
     px = width / 2 + 1000 * cos(radians(angle));
     py = random(height / 2 + 1000 * sin(radians(angle)));
-    createNewAsteroid(ceil(random(4)), px, py, difficulty);
+    createNewAsteroid(ceil(random(3)), px, py, difficulty);
   }
 }
 
@@ -243,24 +255,28 @@ function createExplodeParticles(x, y, size) {
  * @returns 
  */
 function createNewAsteroid(type, x, y, difficulty) {
-  var a = createSprite(px, py, type * 20)
-  a.speed = 8 - (type) + difficulty;
+  var a = createSprite(px, py, type * 30)
+  a.speed = 6 - (type) + difficulty;
   a.direction = random(180);
   a.rotationSpeed = 0.5;
   a.type = type;
-  a.color = "brown";
+  a.health = 0;
+  // a.color = "brown";
 
-  if (a.type == 4) {
-    a.scale = 1.75;
-  }
   if (a.type == 3) {
-    a.scale = 1.65;
+    a.addImage("black", asteroid_img[2]);
+    a.scale = 1.75;
+    a.health = 3;
   }
   if (a.type == 2) {
-    a.scale = 1.55;
+    a.addImage("gray", asteroid_img[1]);
+    a.scale = 1.65;
+    a.health = 2;
   }
   if (a.type == 1) {
-    a.scale = 1.5;
+    a.addImage("brown", asteroid_img[0]);
+    a.scale = 1.55;
+    a.health = 1;
   }
   a.mass = 2 + a.scale;
   asteroids.add(a);
@@ -290,7 +306,7 @@ function draw() {
       var angle = random(360);
       px = width / 2 + 1000 * cos(radians(angle));
       py = random(height / 2 + 1000 * sin(radians(angle)));
-      setTimeout(createNewAsteroid(ceil(random(2, 4)), px, py, difficulty), 20000);
+      setTimeout(createNewAsteroid(ceil(random(3)), px, py, difficulty), 20000);
     }
   }
   background(background_imgs[1]);
@@ -310,8 +326,46 @@ function asteroidHit(asteroid, sprite) {
   if (sprite.removed) {
     return;
   }
+  if (asteroid.type == 3){
+    let destroy = new Sprite();
+    destroy.x = asteroid.position.x;
+    destroy.y = asteroid.position.y;
+    destroy.addAni("destroy_black", asteroid_black_ani);
+    // if (asteroid.health == 0) { asteroid.remove(); }
+    // else{
+    // asteroid.health--;
+    // sprite.remove();
+    // }
+    destroy.removeColliders();
+    destroy.life = 20;
+  }
+  if (asteroid.type == 2){
+    let destroy = new Sprite();
+    destroy.x = asteroid.position.x;
+    destroy.y = asteroid.position.y;
+    destroy.addAni("destroy_gray", asteroid_gray_ani);
+    // if (asteroid.health == 0) { asteroid.remove(); }
+    // else{
+    // asteroid.health--;
+    // sprite.remove();
+    // }
+    destroy.removeColliders();
+    destroy.life = 20;
+  }
+  if (asteroid.type == 1){
+    let destroy = new Sprite();
+    destroy.x = asteroid.position.x;
+    destroy.y = asteroid.position.y;
+    destroy.addAni("destroy_brown", asteroid_brown_ani);
+    // if (asteroid.health == 0) { asteroid.remove(); }
+    // else{
+    // asteroid.health--;
+    // sprite.remove();
+    // }
+    destroy.removeColliders();
+    destroy.life = 20;
+  }
   sprite.remove();
-  asteroid.remove();
 }
 // place holder function
 // comment out this code if you don't want to see the screen
