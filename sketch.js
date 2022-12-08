@@ -581,9 +581,9 @@ function spaceShipControl() {
   if (!spaceship.removed && kb.presses('x')) {
     let size = upgradeIcons.size();
     spaceship.changeAnimation(SPAC_ANI_3);
-    if (size >= 6 && size < 12) {
+    if (size >= 30 && size < 60) {
       createBullet(20, 15, spaceship.rotation, "bullet2");
-    } else if (size >= 12) {
+    } else if (size >= 60) {
       for (let i = 0; i < 5; i++) {
         createBullet(20, 20, i * 90, "bullet2");
       }
