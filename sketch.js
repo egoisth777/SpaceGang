@@ -10,10 +10,8 @@ let earth;
 let shields; // group of the upgrade model
 let upgradeModel; // upgrade model across the map
 let difficulty;
-let increment = 4;
 
-
-
+// Menu logistic control variables
 let flag = false;
 let buttonStart;
 let counter = 0;
@@ -52,8 +50,8 @@ let bulletAnimation;
 // some constants
 const MARGIN = 40;
 const MAXLIFE = 10;
-const CANVASWIDTH = 1200;
-const CANVASHEIGHT = 1200;
+const CANVASWIDTH = 800;
+const CANVASHEIGHT = 800;
 const MAXUPGRADE = 12;
 
 const RANK1 = "rank1";
@@ -61,7 +59,7 @@ const RANK2 = "rank2";
 const RANK3 = "rank3";
 const HEALTH = ["health1", "health2", "health3", "health4", "health5", "health6", "health7", "health8", "health9", "health10"];
 
-
+const SPAC_ANI_ARR = ["spaceshipAnimation1", "spaceshipAnimation2", "spaceshipAnimation3", "spaceshipAnimation4"];
 const SPAC_ANI_1 = "spaceshipAnimation1";
 const SPAC_ANI_2 = "spaceshipAnimation2";
 const SPAC_ANI_3 = "spaceshipAnimation3";
@@ -576,6 +574,9 @@ function destructor() {
   setup();
 }
 
+/**
+ * The control part of the spaceship
+ */
 function spaceShipControl() {
 
   if (!spaceship.removed && kb.presses('x')) {
@@ -585,7 +586,7 @@ function spaceShipControl() {
       createBullet(20, 15, spaceship.rotation, "bullet2");
     } else if (size >= 12) {
       for (let i = 0; i < 5; i++) {
-        createBullet(20, 20, i * 90, "bullet2");
+        createBullet(20, 20, spaceship.orientation + i * 90, "bullet2");
       }
     } else {
       createBullet(15, 15, spaceship.rotation, "bullet1");
@@ -691,5 +692,7 @@ function collectShield(spaceship, shield) {
   // console.log("I am called");
   // console.log(currentHealth);
   shield.remove();
-  currentHealth++;
+  if(currentHealth < MAXLIFE){
+    currentHealth++;
+  }
 }
